@@ -1,22 +1,54 @@
 use crate::utils::{print as p, templates};
 use anyhow::Result;
 use clap::Subcommand;
+use colored::*;
+use dialoguer::{Confirm, Input};
 use std::path::PathBuf;
 
 #[derive(Subcommand)]
 pub enum TemplateCommands {
-    /// Publish a local contract template to the user registry
-    Publish {
-        /// Local path to the contract template directory
-        path: PathBuf,
-    },
-    /// List known contract templates
-    List,
-    /// Search templates by name, description, or tags
+    /// Search for templates in the marketplace
     Search {
-        /// Query text to search for
+        /// Search query (matches name, description, or tags)
         query: String,
+        /// Filter by tags (comma-separated)
+        #[arg(long)]
+        tags: Option<String>,
     },
+    /// List all available templates
+    List,
+    /// Show details of a specific template
+    Show {
+        /// Template name
+        name: String,
+    },
+    /// Publish a template to the local marketplace
+    Publish {
+        /// Path to the template directory
+        path: PathBuf,
+        /// Template name
+        #[arg(long)]
+        name: Option<String>,
+        /// Template description
+        #[arg(long)]
+        description: Option<String>,
+        /// Author name
+        #[arg(long)]
+        author: Option<String>,
+        /// Tags (comma-separated)
+        #[arg(long)]
+        tags: Option<String>,
+        /// Version
+        #[arg(long, default_value = "1.0.0")]
+        version: String,
+    },
+    /// Remove a template from the local marketplace
+    Remove {
+        /// Template name
+        name: String,
+    },
+    /// Initialize the template registry with example templates
+    Init,
 }
 
 pub fn handle(cmd: TemplateCommands) -> Result<()> {
