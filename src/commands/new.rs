@@ -1,6 +1,6 @@
 use crate::utils::print as p;
 use crate::utils::templates;
-use anyhow::Result;
+use anyhow::{Context, Result};
 use clap::Subcommand;
 use colored::*;
 use dialoguer::{theme::ColorfulTheme, Confirm, Input, Select};
@@ -27,12 +27,6 @@ pub enum NewCommands {
         /// Interactively customize the generated contract
         #[arg(long)]
         interactive: bool,
-        /// Use a template from the marketplace
-        #[arg(long)]
-        from: Option<String>,
-        /// Search for templates in the marketplace
-        #[arg(long)]
-        search: Option<String>,
         /// Filter templates by tags (comma-separated)
         #[arg(long)]
         tags: Option<String>,
@@ -46,9 +40,9 @@ pub enum NewCommands {
 
 pub fn handle(cmd: NewCommands) -> Result<()> {
     match cmd {
-        NewCommands::Contract { name, template, from, search, interactive } => {
+        NewCommands::Contract { name, template, from, search, interactive, tags } => {
             if let Some(query) = search {
-                return search_templates(&query);
+                return search_templates(&query, tags.as_deref());
             }
             let name = name.ok_or_else(|| anyhow::anyhow!("A contract name is required unless --search is used"))?;
             if interactive {
@@ -69,8 +63,15 @@ pub fn handle(cmd: NewCommands) -> Result<()> {
     }
 }
 
-fn search_templates(query: &str) -> Result<()> {
-    let results = templates::search_templates(query)?;
+fn search_templates(query: &str, tags: Option<&str>) -> Result<()> {
+    let tag_list: Option<Vec<String>> = tags.map(|t| {
+        t.split(',')
+            .map(|s| s.trim().to_string())
+            .filter(|s| !s.is_empty())
+            .collect()
+    });
+
+    let results = templates::search_templates(query, tag_list.as_deref())?;
     p::header(&format!("Template search results for '{}'", query));
     if results.is_empty() {
         p::info("No templates matched that query.");
@@ -80,7 +81,7 @@ fn search_templates(query: &str) -> Result<()> {
     for (i, entry) in results.iter().enumerate() {
         println!("  {:>2}. {}@{}", i + 1, entry.name, entry.version);
         p::kv("Description", &entry.description);
-        p::kv("Source", &entry.source);
+        p::kv("Source", &entry.source.to_string());
         if !entry.tags.is_empty() {
             p::kv("Tags", &entry.tags.join(", "));
         }
