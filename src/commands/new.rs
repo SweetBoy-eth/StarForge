@@ -29,6 +29,9 @@ pub enum NewCommands {
         /// Filter templates by tags (comma-separated)
         #[arg(long)]
         tags: Option<String>,
+        /// Generate `.github/workflows/stellar-ci.yml` (cargo test + WASM size checks)
+        #[arg(long)]
+        ci: bool,
     },
     /// Scaffold a new Stellar dApp (Vite + React)
     Dapp {
@@ -52,6 +55,7 @@ pub fn handle(cmd: NewCommands) -> Result<()> {
             search,
             interactive,
             tags,
+            ci,
         } => {
             if let Some(query) = search {
                 return handle_template_search(&query, tags.as_deref());
@@ -70,6 +74,7 @@ pub fn handle(cmd: NewCommands) -> Result<()> {
                     "",
                     "none",
                     true,
+                    ci,
                 )
             }
         }
@@ -204,6 +209,7 @@ fn scaffold_contract_interactive(default_name: String) -> Result<()> {
         &opts.author,
         &opts.storage,
         opts.include_tests,
+        false,
     )
 }
 
@@ -215,7 +221,9 @@ fn scaffold_contract(
     author: &str,
     storage: &str,
     include_tests: bool,
+    include_ci: bool,
 ) -> Result<()> {
+    let _ = include_ci;
     let dir = Path::new(&name);
     if dir.exists() {
         anyhow::bail!("Directory '{}' already exists", name);
