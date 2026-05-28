@@ -207,16 +207,22 @@ pub struct WalletRotationRecord {
 impl Default for Config {
     fn default() -> Self {
         let mut networks = HashMap::new();
-        networks.insert("testnet".to_string(), NetworkConfig {
-            horizon_url: "https://horizon-testnet.stellar.org".to_string(),
-            soroban_rpc_url: Some("https://soroban-testnet.stellar.org".to_string()),
-            friendbot_url: Some("https://friendbot.stellar.org".to_string()),
-        });
-        networks.insert("mainnet".to_string(), NetworkConfig {
-            horizon_url: "https://horizon.stellar.org".to_string(),
-            soroban_rpc_url: Some("https://mainnet.sorobanrpc.com".to_string()),
-            friendbot_url: None,
-        });
+        networks.insert(
+            "testnet".to_string(),
+            NetworkConfig {
+                horizon_url: "https://horizon-testnet.stellar.org".to_string(),
+                soroban_rpc_url: Some("https://soroban-testnet.stellar.org".to_string()),
+                friendbot_url: Some("https://friendbot.stellar.org".to_string()),
+            },
+        );
+        networks.insert(
+            "mainnet".to_string(),
+            NetworkConfig {
+                horizon_url: "https://horizon.stellar.org".to_string(),
+                soroban_rpc_url: Some("https://mainnet.sorobanrpc.com".to_string()),
+                friendbot_url: None,
+            },
+        );
         networks.insert(
             "docker-testnet".to_string(),
             NetworkConfig {
@@ -432,9 +438,7 @@ mod tests {
     #[test]
     fn test_valid_plain_secret_key() {
         let Ok(secret) = std::env::var("STARFORGE_TEST_SECRET_KEY") else {
-            eprintln!(
-                "skipping test_valid_plain_secret_key: STARFORGE_TEST_SECRET_KEY is not set"
-            );
+            eprintln!("skipping test_valid_plain_secret_key: STARFORGE_TEST_SECRET_KEY is not set");
             return;
         };
         assert!(validate_secret_key(&secret).is_ok());
@@ -485,11 +489,13 @@ pub fn add_custom_network(
     if config.networks.contains_key(&name) {
         anyhow::bail!("Network '{}' already exists", name);
     }
-    config.networks.insert(name, NetworkConfig {
-        horizon_url,
-        soroban_rpc_url,
-        friendbot_url,
-    });
+    config.networks.insert(
+        name,
+        NetworkConfig {
+            horizon_url,
+            soroban_rpc_url,
+            friendbot_url,
+        },
+    );
     Ok(())
 }
-

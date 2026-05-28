@@ -46,16 +46,28 @@ fn fixture_file_exists() {
 #[test]
 fn fixture_file_has_correct_size() {
     let bytes = fs::read(fixture_path()).expect("should be able to read fixture");
-    assert_eq!(bytes.len(), 8, "minimal.wasm must be exactly 8 bytes (magic + version)");
+    assert_eq!(
+        bytes.len(),
+        8,
+        "minimal.wasm must be exactly 8 bytes (magic + version)"
+    );
 }
 
 #[test]
 fn fixture_file_starts_with_wasm_magic() {
     let bytes = fs::read(fixture_path()).expect("should be able to read fixture");
     // WASM magic: \0asm
-    assert_eq!(&bytes[0..4], &[0x00, 0x61, 0x73, 0x6d], "first 4 bytes must be WASM magic");
+    assert_eq!(
+        &bytes[0..4],
+        &[0x00, 0x61, 0x73, 0x6d],
+        "first 4 bytes must be WASM magic"
+    );
     // WASM version 1
-    assert_eq!(&bytes[4..8], &[0x01, 0x00, 0x00, 0x00], "bytes 4-7 must be WASM version 1");
+    assert_eq!(
+        &bytes[4..8],
+        &[0x01, 0x00, 0x00, 0x00],
+        "bytes 4-7 must be WASM version 1"
+    );
 }
 
 // ---------------------------------------------------------------------------
@@ -86,7 +98,11 @@ fn fixture_sha256_is_64_hex_chars() {
     let bytes = fs::read(fixture_path()).expect("should be able to read fixture");
     let hash = sha256_hex(&bytes);
 
-    assert_eq!(hash.len(), 64, "SHA-256 hex output must be exactly 64 characters");
+    assert_eq!(
+        hash.len(),
+        64,
+        "SHA-256 hex output must be exactly 64 characters"
+    );
     assert!(
         hash.chars().all(|c| c.is_ascii_hexdigit()),
         "SHA-256 hex output must only contain 0-9 a-f characters, got: {hash}"

@@ -77,9 +77,7 @@ impl PassphraseStrength {
     /// A simple ASCII bar (5 segments) representing the score.
     pub fn bar(&self) -> String {
         let filled = self.score() as usize + 1; // 1–5
-        let bar: String = (0..5)
-            .map(|i| if i < filled { '█' } else { '░' })
-            .collect();
+        let bar: String = (0..5).map(|i| if i < filled { '█' } else { '░' }).collect();
         match self {
             Self::VeryWeak | Self::Weak => bar.red().to_string(),
             Self::Fair => bar.yellow().to_string(),
@@ -201,7 +199,10 @@ pub fn prompt_passphrase(prompt: &str, strict: bool) -> Result<String> {
                     .map_err(|e| anyhow!("Failed to read passphrase confirmation: {}", e))?;
 
                 if pwd != confirm {
-                    eprintln!("  {}", "✗ Passphrases do not match. Please try again.".red());
+                    eprintln!(
+                        "  {}",
+                        "✗ Passphrases do not match. Please try again.".red()
+                    );
                     continue;
                 }
 
@@ -232,24 +233,29 @@ pub fn prompt_password(prompt: &str, confirm: bool) -> Result<String> {
 pub fn encrypt_secret(password: &str, secret: &str) -> Result<String> {
     let mut salt = [0u8; 16];
     rand::thread_rng().fill_bytes(&mut salt);
-    
+
     let argon2 = Argon2::default();
     let mut key = [0u8; 32];
-    argon2.hash_password_into(password.as_bytes(), &salt, &mut key)
+    argon2
+        .hash_password_into(password.as_bytes(), &salt, &mut key)
         .map_err(|e| anyhow!("Key derivation failed: {}", e))?;
-        
+
     let cipher = Aes256Gcm::new(&key.into());
     let mut nonce_bytes = [0u8; 12];
     rand::thread_rng().fill_bytes(&mut nonce_bytes);
-    
+
     let nonce = Nonce::from_slice(&nonce_bytes);
-    let ciphertext = cipher.encrypt(nonce, secret.as_bytes())
+    let ciphertext = cipher
+        .encrypt(nonce, secret.as_bytes())
         .map_err(|e| anyhow!("Encryption failed: {}", e))?;
-        
+
     let encoded_salt = BASE64.encode(salt);
     let encoded_nonce = BASE64.encode(nonce_bytes);
     let encoded_cipher = BASE64.encode(ciphertext);
-    Ok(format!("{}:{}:{}", encoded_salt, encoded_nonce, encoded_cipher))
+    Ok(format!(
+        "{}:{}:{}",
+        encoded_salt, encoded_nonce, encoded_cipher
+    ))
 }
 
 pub fn decrypt_secret(password: &str, bundle: &str) -> Result<String> {
@@ -257,22 +263,24 @@ pub fn decrypt_secret(password: &str, bundle: &str) -> Result<String> {
     if parts.len() != 3 {
         anyhow::bail!("Invalid encrypted bundle format");
     }
-    
+
     let salt = BASE64.decode(parts[0])?;
     let nonce_bytes = BASE64.decode(parts[1])?;
     let ciphertext = BASE64.decode(parts[2])?;
-    
+
     let argon2 = Argon2::default();
     let mut key = [0u8; 32];
-    argon2.hash_password_into(password.as_bytes(), &salt, &mut key)
+    argon2
+        .hash_password_into(password.as_bytes(), &salt, &mut key)
         .map_err(|e| anyhow!("Key derivation failed: {}", e))?;
-        
+
     let cipher = Aes256Gcm::new(&key.into());
     let nonce = Nonce::from_slice(&nonce_bytes);
-    
-    let decrypted = cipher.decrypt(nonce, ciphertext.as_ref())
+
+    let decrypted = cipher
+        .decrypt(nonce, ciphertext.as_ref())
         .map_err(|_| anyhow!("Decryption failed (incorrect password or corrupted data)"))?;
-        
+
     String::from_utf8(decrypted).map_err(|e| anyhow!("Invalid UTF-8 in decrypted secret: {}", e))
 }
 
@@ -307,7 +315,11 @@ mod tests {
         let result = check_passphrase_strength(short);
         assert!(result.is_err());
         let msg = result.unwrap_err().to_string();
-        assert!(msg.contains("at least"), "expected length message, got: {}", msg);
+        assert!(
+            msg.contains("at least"),
+            "expected length message, got: {}",
+            msg
+        );
     }
 
     #[test]

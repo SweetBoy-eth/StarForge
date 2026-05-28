@@ -33,8 +33,7 @@ impl PluginManager {
     /// compiled with a compatible Rust toolchain and ABI.
     pub unsafe fn load_plugin<P: AsRef<OsStr>>(&mut self, path: P) -> Result<()> {
         let path_display = path.as_ref().to_string_lossy().to_string();
-        let library =
-            Rc::new(Library::new(path).context("Failed to load library")?);
+        let library = Rc::new(Library::new(path).context("Failed to load library")?);
 
         let decl: Symbol<*mut PluginDeclaration> = library
             .get(b"PLUGIN_DECLARATION")
@@ -109,7 +108,9 @@ struct ProxyRegistrar {
 
 impl ProxyRegistrar {
     fn new() -> Self {
-        Self { plugins: Vec::new() }
+        Self {
+            plugins: Vec::new(),
+        }
     }
 }
 

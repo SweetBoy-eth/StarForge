@@ -82,9 +82,10 @@ pub fn handle(args: DeployArgs) -> Result<()> {
     let mut wasm_size_kb = wasm_bytes.len() as f64 / 1024.0;
 
     if args.optimize {
-        let optimized_path = args
-            .wasm
-            .with_file_name(format!("{}-optimized.wasm", args.wasm.file_stem().unwrap_or_default().to_string_lossy()));
+        let optimized_path = args.wasm.with_file_name(format!(
+            "{}-optimized.wasm",
+            args.wasm.file_stem().unwrap_or_default().to_string_lossy()
+        ));
         p::header("WASM Optimization");
         p::kv("Input WASM", &args.wasm.display().to_string());
         p::kv("Output WASM", &optimized_path.display().to_string());
@@ -95,7 +96,10 @@ pub fn handle(args: DeployArgs) -> Result<()> {
         println!();
         p::success("Optimization pass completed");
         p::kv("Input size", &format!("{} bytes", result.input_size_bytes));
-        p::kv("Output size", &format!("{} bytes", result.output_size_bytes));
+        p::kv(
+            "Output size",
+            &format!("{} bytes", result.output_size_bytes),
+        );
         p::separator();
     }
 
@@ -287,13 +291,19 @@ mod tests {
     #[test]
     fn sha256_is_deterministic() {
         let bytes = b"hello-starforge";
-        assert_eq!(compute_local_wasm_hash(bytes), compute_local_wasm_hash(bytes));
+        assert_eq!(
+            compute_local_wasm_hash(bytes),
+            compute_local_wasm_hash(bytes)
+        );
     }
 
     /// Different bytes → different digest (collision-resistance sanity check).
     #[test]
     fn sha256_differs_for_different_inputs() {
-        assert_ne!(compute_local_wasm_hash(b"abc"), compute_local_wasm_hash(b"abd"));
+        assert_ne!(
+            compute_local_wasm_hash(b"abc"),
+            compute_local_wasm_hash(b"abd")
+        );
     }
 
     /// Known-answer test: SHA-256("abc") == the FIPS 180-4 test vector.
@@ -305,8 +315,7 @@ mod tests {
         let hash = compute_local_wasm_hash(b"abc");
         assert_eq!(
             hash,
-            "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
-                // SHA-256("abc") as computed by sha2 0.10 / FIPS 180-4.
+            "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad" // SHA-256("abc") as computed by sha2 0.10 / FIPS 180-4.
         );
     }
 

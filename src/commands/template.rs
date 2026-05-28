@@ -79,15 +79,11 @@ fn publish(
     // Resolve name interactively if not provided
     let name = match name {
         Some(n) => n,
-        None => Input::new()
-            .with_prompt("Template name")
-            .interact_text()?,
+        None => Input::new().with_prompt("Template name").interact_text()?,
     };
     let description = match description {
         Some(d) => d,
-        None => Input::new()
-            .with_prompt("Description")
-            .interact_text()?,
+        None => Input::new().with_prompt("Description").interact_text()?,
     };
     let author = match author {
         Some(a) => a,
@@ -155,7 +151,10 @@ fn search(query: String) -> Result<()> {
         return Ok(());
     }
 
-    p::info(&format!("Found {} result(s), ranked by popularity:", results.len()));
+    p::info(&format!(
+        "Found {} result(s), ranked by popularity:",
+        results.len()
+    ));
     println!();
 
     for (i, template) in results.iter().enumerate() {
@@ -183,11 +182,12 @@ fn search(query: String) -> Result<()> {
 
 fn show(name: String) -> Result<()> {
     let registry = templates::load_registry()?;
-    let template = registry.templates
+    let template = registry
+        .templates
         .iter()
         .find(|t| t.name == name)
         .ok_or_else(|| anyhow::anyhow!("Template '{}' not found", name))?;
-    
+
     p::header(&format!("Template: {}", template.name));
     p::kv("Description", &template.description);
     p::kv("Author", &template.author);
@@ -200,7 +200,7 @@ fn show(name: String) -> Result<()> {
     p::kv("Verified", if template.verified { "Yes" } else { "No" });
     p::kv("Created", &template.created_at);
     p::kv("Updated", &template.updated_at);
-    
+
     Ok(())
 }
 

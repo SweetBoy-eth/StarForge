@@ -49,14 +49,12 @@ pub fn handle(args: MonitorArgs) -> Result<()> {
     println!();
 
     match (&args.contract, &args.wallet) {
-        (Some(contract_id), None) => monitor_contract(
-            contract_id,
-            args.events.as_deref(),
-            network,
-            args.interval,
-            args.follow,
-        ),
-        (None, Some(wallet_name)) => monitor_wallet(wallet_name, args.threshold, network, args.interval),
+        (Some(contract_id), None) => {
+            monitor_contract(contract_id, args.events.as_deref(), network, args.interval)
+        }
+        (None, Some(wallet_name)) => {
+            monitor_wallet(wallet_name, args.threshold, network, args.interval)
+        }
         _ => anyhow::bail!("Specify either --contract or --wallet (but not both)"),
     }
 }
@@ -84,34 +82,18 @@ fn monitor_contract(
         rpc_url
     ));
 
-    let should_run = Arc::new(AtomicBool::new(true));
-    {
-        let should_run = Arc::clone(&should_run);
-        let _ = ctrlc::set_handler(move || {
-            should_run.store(false, Ordering::SeqCst);
-        });
-    }
-
     let mut stream =
         SorobanEventStream::new(rpc_url, contract_id.to_string()).with_poll_interval(interval);
-
-    let mut printed_any = false;
-    while should_run.load(Ordering::SeqCst) {
-        match stream.next_batch() {
-            Ok(batch) => {
-                for event in batch {
-                    let as_text = event.value.to_string();
-                    if let Some(ref filters) = filter_set {
-                        let mut matches = false;
-                        for f in filters {
-                            if as_text.to_lowercase().contains(f) {
-                                matches = true;
-                                break;
-                            }
-                        }
-                        if !matches {
-                            continue;
-                        }
+    loop {
+        let batch = stream.next_batch()?;
+        for event in batch {
+            let as_text = event.value.to_string();
+            if let Some(ref filters) = filter_set {
+                let mut matches = false;
+                for f in filters {
+                    if as_text.to_lowercase().contains(f) {
+                        matches = true;
+                        break;
                     }
                     printed_any = true;
                     notifications::success(&format!(
@@ -174,7 +156,10 @@ fn monitor_wallet(
             .and_then(|b| b.balance.parse::<f64>().ok())
             .unwrap_or(0.0);
 
-        if last_balance.map(|b| (b - native).abs() > f64::EPSILON).unwrap_or(true) {
+        if last_balance
+            .map(|b| (b - native).abs() > f64::EPSILON)
+            .unwrap_or(true)
+        {
             notifications::info(&format!("XLM balance: {:.7}", native));
             last_balance = Some(native);
         }
