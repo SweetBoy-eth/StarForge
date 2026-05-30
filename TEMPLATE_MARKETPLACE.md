@@ -429,6 +429,37 @@ such as `✓ Verified`, `📖 Documented`, `🟢 Actively maintained` and
 `★ Popular`. This makes trusted, well-documented and well-maintained templates
 easier to discover.
 
+## Installation Progress & Recovery
+
+Installing a marketplace template runs through three visible steps, each shown
+with a spinner that resolves to a check mark:
+
+```
+✓ Fetched template 'uniswap-v2'
+✓ Template structure is valid
+✓ Installed into 'my-dex'
+```
+
+### Safe rollback
+
+Installation is **atomic from the user's point of view**: if any step fails the
+partially-written files are removed automatically, so you never end up with a
+half-installed project directory.
+
+- The download is staged in a temporary directory that is always cleaned up.
+- The target project directory is only kept once every step succeeds; on
+  failure it is rolled back.
+
+### Actionable errors
+
+When a step fails, the error explains what went wrong and how to recover, e.g.:
+
+```
+Failed to fetch template 'uniswap-v2' from git:https://github.com/...
+  • Check your network connection and that `git` is installed.
+  • The partial download was rolled back automatically.
+```
+
 ## Support
 
 For issues or questions:
