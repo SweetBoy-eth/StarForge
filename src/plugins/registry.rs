@@ -441,6 +441,7 @@ mod tests {
     use super::*;
     use tempfile::TempDir;
 
+    #[allow(dead_code)]
     fn temp_registry(tmp: &TempDir) -> PathBuf {
         tmp.path().join("registry.json")
     }
