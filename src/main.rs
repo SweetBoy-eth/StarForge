@@ -115,6 +115,22 @@ enum Commands {
     /// Run connectivity diagnostics for attached Ledger/Trezor devices
     Diagnostics(commands::diagnostics::DiagnosticsArgs),
 
+    /// Formal verification tooling for Soroban contracts (harness, properties, CI)
+    #[command(subcommand)]
+    Verify(commands::verify::VerifyCommands),
+
+    /// Deployment analytics platform (track, metrics, anomalies, dashboard)
+    #[command(subcommand)]
+    Analytics(commands::analytics::AnalyticsCommands),
+
+    /// Automated contract upgrade workflows (compat check, plan, apply, rollback)
+    #[command(subcommand)]
+    UpgradeAuto(commands::upgrade_auto::UpgradeAutoCommands),
+
+    /// Contract performance optimization engine (analyse, transform, bench, report)
+    #[command(subcommand)]
+    Optimize(commands::optimize::OptimizeCommands),
+
     /// Execute an installed plugin command (e.g. `starforge defi ...`)
     #[command(external_subcommand)]
     External(Vec<String>),
@@ -158,6 +174,10 @@ fn main() {
         Commands::Upgrade(_) => "upgrade",
         Commands::Lint(_) => "lint",
         Commands::Diagnostics(_) => "diagnostics",
+        Commands::Verify(_) => "verify",
+        Commands::Analytics(_) => "analytics",
+        Commands::UpgradeAuto(_) => "upgrade-auto",
+        Commands::Optimize(_) => "optimize",
         Commands::External(_) => "external",
     }
     .to_string();
@@ -187,6 +207,10 @@ fn main() {
         Commands::Upgrade(cmd) => commands::upgrade::handle(cmd),
         Commands::Lint(args) => commands::lint::handle(args),
         Commands::Diagnostics(args) => commands::diagnostics::handle(args),
+        Commands::Verify(cmd) => commands::verify::handle(cmd),
+        Commands::Analytics(cmd) => commands::analytics::handle(cmd),
+        Commands::UpgradeAuto(cmd) => commands::upgrade_auto::handle(cmd),
+        Commands::Optimize(cmd) => commands::optimize::handle(cmd),
         Commands::External(args) => handle_external_plugin(args),
     };
     let duration = start.elapsed();
