@@ -117,11 +117,31 @@ enum Commands {
     #[command(subcommand)]
     Upgrade(commands::upgrade::UpgradeCommands),
 
+    /// Multi-contract deployment orchestration
+    #[command(subcommand)]
+    Orchestrate(commands::orchestrate::OrchestrateCommands),
+
+    /// Security hardening, validation, and monitoring
+    #[command(subcommand)]
+    Security(commands::security::SecurityCommands),
+
     /// Static analysis and linting for Soroban contracts
     Lint(commands::lint::LintArgs),
 
     /// Run connectivity diagnostics for attached Ledger/Trezor devices
     Diagnostics(commands::diagnostics::DiagnosticsArgs),
+
+    /// Social features and collaboration tools
+    #[command(subcommand)]
+    Social(commands::social::SocialCommands),
+
+    /// Contract documentation portal
+    #[command(subcommand)]
+    Docs(commands::docs::DocsCommands),
+
+    /// Deployment orchestration for multi-contract deployments
+    #[command(subcommand)]
+    Orchestrate(commands::orchestrate::OrchestrateCommands),
 
     /// Execute an installed plugin command (e.g. `starforge defi ...`)
     #[command(external_subcommand)]
@@ -166,8 +186,13 @@ fn main() {
         Commands::Template(_) => "template",
         Commands::Registry(_) => "registry",
         Commands::Upgrade(_) => "upgrade",
+        Commands::Orchestrate(_) => "orchestrate",
+        Commands::Security(_) => "security",
         Commands::Lint(_) => "lint",
         Commands::Diagnostics(_) => "diagnostics",
+        Commands::Social(_) => "social",
+        Commands::Docs(_) => "docs",
+        Commands::Orchestrate(_) => "orchestrate",
         Commands::External(_) => "external",
     }
     .to_string();
@@ -197,8 +222,13 @@ fn main() {
         Commands::Template(args) => commands::template::handle(args),
         Commands::Registry(cmd) => commands::registry::handle(cmd),
         Commands::Upgrade(cmd) => commands::upgrade::handle(cmd),
+        Commands::Orchestrate(cmd) => commands::orchestrate::handle(cmd),
+        Commands::Security(cmd) => commands::security::handle(cmd),
         Commands::Lint(args) => commands::lint::handle(args),
         Commands::Diagnostics(args) => commands::diagnostics::handle(args),
+        Commands::Social(cmd) => commands::social::handle(cmd),
+        Commands::Docs(cmd) => commands::docs::handle(cmd),
+        Commands::Orchestrate(cmd) => commands::orchestrate::handle(cmd),
         Commands::External(args) => handle_external_plugin(args),
     };
     let duration = start.elapsed();
